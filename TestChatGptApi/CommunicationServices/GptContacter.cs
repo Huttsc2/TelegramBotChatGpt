@@ -36,7 +36,7 @@ namespace TestChatGptApi.CommunicationServices
                 {
                     throw new Exception("Unknown Error");
                 }
-                responsContent = "Error";
+                return "Error";
             }
             return responsContent;
         }

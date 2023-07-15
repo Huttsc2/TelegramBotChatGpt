@@ -3,6 +3,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using TestChatGptApi.Helper;
+using TelegramBotChatGpt.CommunicationServices;
 
 namespace TestChatGptApi.CommunicationServices
 {
@@ -11,22 +12,62 @@ namespace TestChatGptApi.CommunicationServices
 
         static ITelegramBotClient Bot = new TelegramBotClient(new KeysReader().GetKeys().BotKey);
         
-        public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        public static async Task GetGptResponse(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
         {
-            GptContacter test = new GptContacter();
+            GptContacter gpt = new GptContacter();
 
             Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
+
             if (update.Type == UpdateType.Message)
             {
                 var message = update.Message;
+                
+                if (message.Text == null)
+                {
+                    await botClient.SendTextMessageAsync(message.Chat, "Случилась какая то хУйня!");
+                    return;
+                }
+
                 if (message.Text.ToLower() == "хуй")
                 {
                     await botClient.SendTextMessageAsync(message.Chat, "Раз, два, три!");
                     return;
                 }
                 string request = message.Text;
-                string response = test.GetResponse(request).GetAwaiter().GetResult();
+                string response = gpt.GetResponse(request).GetAwaiter().GetResult();
                 await botClient.SendTextMessageAsync(message.Chat, response);
+                return;
+            }
+            return;
+        }
+
+        public static async Task GetDalleResponse(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken)
+        {
+            DalleContacter dalle = new DalleContacter();
+
+            Console.WriteLine(Newtonsoft.Json.JsonConvert.SerializeObject(update));
+
+            if (update.Type == UpdateType.Message)
+            {
+                var message = update.Message;
+
+                if (message.Text == null)
+                {
+                    await botClient.SendTextMessageAsync(message.Chat, "Случилась какая то хУйня!");
+                    return;
+                }
+
+                if (message.Text.ToLower() == "хуй")
+                {
+                    await botClient.SendTextMessageAsync(message.Chat, "Раз, два, три!");
+                    return;
+                }
+                string request = message.Text;
+                string response = dalle.GetImage(request).GetAwaiter().GetResult();
+                await botClient.SendPhotoAsync(message.Chat,
+                    photo: InputFile.FromUri(response),
+                    parseMode: ParseMode.Html,
+                    cancellationToken: cancellationToken);
             }
         }
 
@@ -46,7 +87,8 @@ namespace TestChatGptApi.CommunicationServices
                 AllowedUpdates = { },
             };
             Bot.StartReceiving(
-                HandleUpdateAsync,
+                //GetGptResponse,
+                GetDalleResponse,
                 HandleErrorAsync,
                 receiverOptions,
                 cancellationToken

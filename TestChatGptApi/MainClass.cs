@@ -6,8 +6,8 @@ namespace TestChatGptApi
     {
         static void Main(string[] args)
         {
-            TelegramBot telegramBotTest = new TelegramBot();
-            telegramBotTest.Initialize();
+            TelegramBot telegramBot = new TelegramBot();
+            telegramBot.Initialize();
         }
     }
 }
