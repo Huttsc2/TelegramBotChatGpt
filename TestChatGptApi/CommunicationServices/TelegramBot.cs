@@ -64,10 +64,19 @@ namespace TestChatGptApi.CommunicationServices
                 }
                 string request = message.Text;
                 string response = dalle.GetImage(request).GetAwaiter().GetResult();
-                await botClient.SendPhotoAsync(message.Chat,
+
+                try
+                {
+                    await botClient.SendPhotoAsync(message.Chat,
                     photo: InputFile.FromUri(response),
                     parseMode: ParseMode.Html,
                     cancellationToken: cancellationToken);
+                }
+                catch
+                {
+                    await botClient.SendTextMessageAsync(message.Chat, request + " - это полная хуйня, я отказываюсь \"это\" рисовать");
+                }
+                
             }
         }
 
